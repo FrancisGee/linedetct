@@ -45,11 +45,19 @@ Notes:
 #define PI 3.1415926
 
 using namespace cv;
+using namespace std;
 
 int main(int argc, char *argv[]) {
     int houghVote = 200;
     string arg = argv[1];
-    bool showSteps = argv[2];
+
+
+    //Set up windows
+    //for Debug
+    bool showOriginal = false;
+    bool showCanny = true;
+    bool showHough = false;
+    bool showHoughP = false;
 
     string window_name = "Processed Video";
     namedWindow(window_name, CV_WINDOW_KEEPRATIO); //resizable window;
@@ -65,26 +73,57 @@ int main(int argc, char *argv[]) {
 
     Size frameSize(static_cast<int>(dWidth), static_cast<int>(dHeight));
 
-    VideoWriter oVideoWriter("LaneDetection.avi", CV_FOURCC('P', 'I', 'M', '1'), 20, frameSize,
-                             true); //initialize the VideoWriter object
+    //Encode resulting video
+//    VideoWriter oVideoWriter("LaneDetection.avi", CV_FOURCC('P', 'I', 'M', '1'), 20, frameSize,
+//                             true); //initialize the VideoWriter object
+
+
+
+    //Process Frame
 
     Mat image;
+    double frameItr = 0; //?????
     image = imread(argv[1]);
+    int crestCount = 0, frameSkip = 0;    //???
+
+
     while (1) {
+        // capture on intervals to make vid smoother
         capture >> image;
+        frameItr += 100;
+
         if (image.empty())
             break;
+
         Mat gray;
+
+
         cvtColor(image, gray, CV_RGB2GRAY);
-        vector<string> codes;
+
+        vector<string> codes; //???
         Mat corners;
         findDataMatrix(gray, codes, corners);
         drawDataMatrixCodes(image, codes, corners);
 
         Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
+
+        // ROI
+        // optimized? -=> yes
+//        int top = 0;
+//        int left = 0;
+//        int width = 800;
+//        int height = 600;
+//
+//        Rect roi(left,top,width,height);
+
         Mat imgROI = image(roi);
+        Scalar val = Scalar(0, 0, 0);//??????
+        copyMakeBorder(imgROI, imgROI, 2, 2, 2, 2, BORDER_CONSTANT, val);   //???
+
+
+
         // Display the image
-        if (showSteps) {
+        if (showOriginal) {
             namedWindow("Original Image");
             imshow("Original Image", imgROI);
             imwrite("original.bmp", imgROI);
@@ -92,15 +131,15 @@ int main(int argc, char *argv[]) {
 
         // Canny algorithm
         Mat contours;
-        Canny(imgROI, contours, 50, 250);
+        Canny(imgROI, contours, 100, 200);
         Mat contoursInv;
         threshold(contours, contoursInv, 128, 255, THRESH_BINARY_INV);
 
         // Display Canny image
-        if (showSteps) {
+        if (showCanny) {
             namedWindow("Contours");
-            imshow("Contours1", contoursInv);
-            imwrite("contours.bmp", contoursInv);
+            imshow("Contours1", contours);    //use contoursInv for white
+            imwrite("contours.bmp", contours);
         }
 
         /*
@@ -111,9 +150,9 @@ int main(int argc, char *argv[]) {
        */
         std::vector<Vec2f> lines;
         if (houghVote < 1 or lines.size() > 2) { // we lost all lines. reset
-            houghVote = 200;
+            houghVote = 300;
         } else { houghVote += 25; }
-        while (lines.size() < 5 && houghVote > 0) {
+        while (lines.size() < 4 && houghVote > 0) {
             HoughLines(contours, lines, 1, PI / 180, houghVote);
             houghVote -= 5;
         }
@@ -121,7 +160,7 @@ int main(int argc, char *argv[]) {
         Mat result(imgROI.size(), CV_8U, Scalar(255));
         imgROI.copyTo(result);
 
-        // Draw the limes
+        // Draw the lines----??????
         std::vector<Vec2f>::const_iterator it = lines.begin();
         Mat hough(imgROI.size(), CV_8U, Scalar(0));
         while (it != lines.end()) {
@@ -136,9 +175,9 @@ int main(int argc, char *argv[]) {
                 Point pt1(rho / cos(theta), 0);
                 // point of intersection of the line with last row
                 Point pt2((rho - result.rows * sin(theta)) / cos(theta), result.rows);
-                // draw a white line
-                line(result, pt1, pt2, Scalar(255), 8);
-                line(hough, pt1, pt2, Scalar(255), 8);
+                // draw a  line : Color = Scalar(R, G, B), thickness
+                line(result, pt1, pt2, Scalar(255, 0, 0), 3);
+                line(hough, pt1, pt2, Scalar(255, 0, 0), 3);
             }
 
             //std::cout << "line: (" << rho << "," << theta << ")\n";
@@ -146,7 +185,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Display the detected line image
-        if (showSteps) {
+        if (showHough) {
             namedWindow("Detected Lines with Hough");
             imshow("Detected Lines with Hough", result);
             imwrite("hough.bmp", result);
@@ -155,8 +194,8 @@ int main(int argc, char *argv[]) {
         LineFinder ld;
 
         // Set probabilistic Hough parameters
-        ld.setLineLengthAndGap(60, 10);
-        ld.setMinVote(4);
+        ld.setLineLengthAndGap(10, 60);    //min accepted length and gap
+        ld.setMinVote(15);    // sit > 3 to get rid of "spiderweb"
 
         // Detect lines
         std::vector<Vec4i> li = ld.findLines(contours);
@@ -165,7 +204,7 @@ int main(int argc, char *argv[]) {
         ld.drawDetectedLines(houghP);
         std::cout << "First Hough" << "\n";
 
-        if (showSteps) {
+        if (showHoughP) {
             namedWindow("Detected Lines with HoughP");
             imshow("Detected Lines with HoughP", houghP);
             imwrite("houghP.bmp", houghP);
@@ -177,7 +216,7 @@ int main(int argc, char *argv[]) {
         Mat dst(imgROI.size(), CV_8U, Scalar(0));
         threshold(houghP, houghPinv, 150, 255, THRESH_BINARY_INV); // threshold and invert to black lines
 
-        if (showSteps) {
+        if (showHoughP) {
             namedWindow("Detected Lines with Bitwise");
             imshow("Detected Lines with Bitwise", houghPinv);
         }
@@ -185,16 +224,20 @@ int main(int argc, char *argv[]) {
         Canny(houghPinv, contours, 100, 350);
         li = ld.findLines(contours);
         // Display Canny image
-        if (showSteps) {
-            namedWindow("Contours");
-            imshow("Contours2", contours);
-            imwrite("contours.bmp", contoursInv);
-        }
+//        if (showSteps) {
+//            namedWindow("Contours");
+//            imshow("Contours2", contours);
+//            imwrite("contours.bmp", contoursInv);
+//        }
 
         // Set probabilistic Hough parameters
+        // more strict than above HoughP
+
         ld.setLineLengthAndGap(5, 2);
         ld.setMinVote(1);
         ld.setShift(image.cols / 3);
+
+
         ld.drawDetectedLines(image);
 
         std::stringstream stream;
@@ -204,7 +247,7 @@ int main(int argc, char *argv[]) {
         imshow(window_name, image);
         imwrite("processed.bmp", image);
 
-        oVideoWriter.write(image); //writer the frame into the file
+//        oVideoWriter.write(image); //writer the frame into the file
 
         char key = (char) waitKey(10);
         lines.clear();
