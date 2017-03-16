@@ -131,7 +131,7 @@ public:
 
             // line orientation + 90o to get the parallel line
 
-            auto ori1;
+            double ori1;
             if (ori1 > PI) ori1 = ori1 - 2 * PI;
 
             double ori2 = atan2(static_cast<double>(y2 - y1), static_cast<double>(x2 - x1)) + PI / 2;
