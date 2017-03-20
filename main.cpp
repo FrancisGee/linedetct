@@ -49,6 +49,8 @@ using namespace std;
 
 void showBasicInformation(VideoCapture &input);
 
+Mat cannyExtract(Mat &imgROI);
+
 int main(int argc, char *argv[]) {
     int houghVote = 200;
     string arg = argv[1];
@@ -108,13 +110,12 @@ int main(int argc, char *argv[]) {
         copyMakeBorder(imgROI, imgROI, 2, 2, 2, 2, BORDER_CONSTANT, val);   //???
 
 
-        // Canny algorithm
-        Mat contours;
-        Canny(imgROI, contours, 100, 200);
-        Mat contoursInv;
-        threshold(contours, contoursInv, 128, 255, THRESH_BINARY_INV);
 
         // Display Canny image
+
+
+
+
 
 
 
@@ -124,7 +125,17 @@ int main(int argc, char *argv[]) {
            Increase by 25 for the next frame if we found some lines.
            This is so we don't miss other lines that may crop up in the next frame
            but at the same time we don't want to start the feed back loop from scratch.
+
+
        */
+
+
+
+        //用canny算子对ROI进行特征提取
+        Mat contours = cannyExtract(imgROI);
+
+
+        cout << houghVote << "\n";
         std::vector<Vec2f> lines;
         if (houghVote < 1 or lines.size() > 2) { // we lost all lines. reset
             houghVote = 300;
@@ -237,5 +248,16 @@ void showBasicInformation(VideoCapture &capture) {
     double dHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
 
     std::cout << "Frame Size = " << dWidth << "x" << dHeight << std::endl;
+}
+
+
+Mat cannyExtract(Mat &imgROI) {
+
+    // Canny algorithm
+    Mat contours;
+    Canny(imgROI, contours, 100, 200);
+    Mat contoursInv;
+    threshold(contours, contoursInv, 128, 255, THRESH_BINARY_INV);
+    return contours;
 }
 
