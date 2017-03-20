@@ -73,11 +73,6 @@ int main(int argc, char *argv[]) {
 
     Size frameSize(static_cast<int>(dWidth), static_cast<int>(dHeight));
 
-    //Encode resulting video
-//    VideoWriter oVideoWriter("LaneDetection.avi", CV_FOURCC('P', 'I', 'M', '1'), 20, frameSize,
-//                             true); //initialize the VideoWriter object
-
-
 
     //Process Frame
 
@@ -107,27 +102,10 @@ int main(int argc, char *argv[]) {
 
         Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
 
-        // ROI
-        // optimized? -=> yes
-//        int top = 0;
-//        int left = 0;
-//        int width = 800;
-//        int height = 600;
-//
-//        Rect roi(left,top,width,height);
-
         Mat imgROI = image(roi);
         Scalar val = Scalar(0, 0, 0);//??????
         copyMakeBorder(imgROI, imgROI, 2, 2, 2, 2, BORDER_CONSTANT, val);   //???
 
-
-
-        // Display the image
-        if (showOriginal) {
-            namedWindow("Original Image");
-            imshow("Original Image", imgROI);
-            imwrite("original.bmp", imgROI);
-        }
 
         // Canny algorithm
         Mat contours;
@@ -142,6 +120,8 @@ int main(int argc, char *argv[]) {
             imwrite("contours.bmp", contours);
         }
 
+
+        //霍夫线段检测
         /*
            Hough tranform for line detection with feedback
            Increase by 25 for the next frame if we found some lines.
@@ -160,7 +140,7 @@ int main(int argc, char *argv[]) {
         Mat result(imgROI.size(), CV_8U, Scalar(255));
         imgROI.copyTo(result);
 
-        // Draw the lines----??????
+        // Draw the lines
         std::vector<Vec2f>::const_iterator it = lines.begin();
         Mat hough(imgROI.size(), CV_8U, Scalar(0));
         while (it != lines.end()) {
