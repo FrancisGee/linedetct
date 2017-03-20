@@ -47,6 +47,8 @@ Notes:
 using namespace cv;
 using namespace std;
 
+void showBasicInformation(VideoCapture &input);
+
 int main(int argc, char *argv[]) {
     int houghVote = 200;
     string arg = argv[1];
@@ -55,7 +57,7 @@ int main(int argc, char *argv[]) {
     //Set up windows
     //for Debug
     bool showOriginal = false;
-    bool showCanny = true;
+    bool showCanny = false;
     bool showHough = false;
     bool showHoughP = false;
 
@@ -66,12 +68,11 @@ int main(int argc, char *argv[]) {
     if (!capture.isOpened()) //if this fails, try to open as a video camera, through the use of an integer param
     { capture.open(atoi(arg.c_str())); }
 
-    double dWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-    double dHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+    //显示视频尺寸，帧率等信息
+    showBasicInformation(capture);
 
-    std::cout << "Frame Size = " << dWidth << "x" << dHeight << std::endl;
 
-    Size frameSize(static_cast<int>(dWidth), static_cast<int>(dHeight));
+
 
 
     //Process Frame
@@ -114,11 +115,7 @@ int main(int argc, char *argv[]) {
         threshold(contours, contoursInv, 128, 255, THRESH_BINARY_INV);
 
         // Display Canny image
-        if (showCanny) {
-            namedWindow("Contours");
-            imshow("Contours1", contours);    //use contoursInv for white
-            imwrite("contours.bmp", contours);
-        }
+
 
 
         //霍夫线段检测
@@ -165,44 +162,43 @@ int main(int argc, char *argv[]) {
         }
 
         // Display the detected line image
-        if (showHough) {
-            namedWindow("Detected Lines with Hough");
-            imshow("Detected Lines with Hough", result);
-            imwrite("hough.bmp", result);
-        }
+
+
+
+
         // Create LineFinder instance
-        LineFinder ld;
+//        LineFinder ld;
 
         // Set probabilistic Hough parameters
-        ld.setLineLengthAndGap(10, 60);    //min accepted length and gap
-        ld.setMinVote(15);    // sit > 3 to get rid of "spiderweb"
+//        ld.setLineLengthAndGap(10, 60);    //min accepted length and gap
+//        ld.setMinVote(15);    // sit > 3 to get rid of "spiderweb"
 
         // Detect lines
-        std::vector<Vec4i> li = ld.findLines(contours);
-        Mat houghP(imgROI.size(), CV_8U, Scalar(0));
-        ld.setShift(0);
-        ld.drawDetectedLines(houghP);
-        std::cout << "First Hough" << "\n";
+//        std::vector<Vec4i> li = ld.findLines(contours);
+//        Mat houghP(imgROI.size(), CV_8U, Scalar(0));
+//        ld.setShift(0);
+//        ld.drawDetectedLines(houghP);
+//        std::cout << "First Hough" << "\n";
 
         if (showHoughP) {
             namedWindow("Detected Lines with HoughP");
-            imshow("Detected Lines with HoughP", houghP);
-            imwrite("houghP.bmp", houghP);
+
+
         }
 
         // bitwise AND of the two hough images
-        bitwise_and(houghP, hough, houghP);
-        Mat houghPinv(imgROI.size(), CV_8U, Scalar(0));
-        Mat dst(imgROI.size(), CV_8U, Scalar(0));
-        threshold(houghP, houghPinv, 150, 255, THRESH_BINARY_INV); // threshold and invert to black lines
+//        bitwise_and(houghP, hough, houghP);
+//        Mat houghPinv(imgROI.size(), CV_8U, Scalar(0));
+//        Mat dst(imgROI.size(), CV_8U, Scalar(0));
+//        threshold(houghP, houghPinv, 150, 255, THRESH_BINARY_INV); // threshold and invert to black lines
 
         if (showHoughP) {
             namedWindow("Detected Lines with Bitwise");
-            imshow("Detected Lines with Bitwise", houghPinv);
+
         }
 
-        Canny(houghPinv, contours, 100, 350);
-        li = ld.findLines(contours);
+//        Canny(houghPinv, contours, 100, 350);
+//        li = ld.findLines(contours);
         // Display Canny image
 //        if (showSteps) {
 //            namedWindow("Contours");
@@ -213,19 +209,19 @@ int main(int argc, char *argv[]) {
         // Set probabilistic Hough parameters
         // more strict than above HoughP
 
-        ld.setLineLengthAndGap(5, 2);
-        ld.setMinVote(1);
-        ld.setShift(image.cols / 3);
-
-
-        ld.drawDetectedLines(image);
+//        ld.setLineLengthAndGap(5, 2);
+//        ld.setMinVote(1);
+//        ld.setShift(image.cols / 3);
+//
+//
+//        ld.drawDetectedLines(image);
 
         std::stringstream stream;
-        stream << "Lines Segments: " << lines.size();
+//        stream << "Lines Segments: " << lines.size();
 
-        putText(image, stream.str(), Point(10, image.rows - 10), 2, 0.8, Scalar(0, 0, 255), 0);
+//        putText(image, stream.str(), Point(10, image.rows - 10), 2, 0.8, Scalar(0, 0, 255), 0);
         imshow(window_name, image);
-        imwrite("processed.bmp", image);
+//        imwrite("processed.bmp", image);
 
 //        oVideoWriter.write(image); //writer the frame into the file
 
@@ -234,5 +230,12 @@ int main(int argc, char *argv[]) {
     }
 }
 
+void showBasicInformation(VideoCapture &capture) {
 
+    //显示视频尺寸信息
+    double dWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
+    double dHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
+
+    std::cout << "Frame Size = " << dWidth << "x" << dHeight << std::endl;
+}
 
