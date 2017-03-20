@@ -53,8 +53,11 @@ Mat cannyExtract(Mat &imgROI, bool showCanny);
 
 void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough);
 
+vector<Vec2f> houghDected(int initialHoughVote, Mat &image);
+
+
 int main(int argc, char *argv[]) {
-    int houghVote = 200;
+//    int houghVote = 200;
     string arg = argv[1];
 
 
@@ -73,10 +76,6 @@ int main(int argc, char *argv[]) {
 
     //显示视频尺寸，帧率等信息
     showBasicInformation(capture);
-
-
-
-
 
     //Process Frame
 
@@ -109,40 +108,18 @@ int main(int argc, char *argv[]) {
         Mat imgROI = image(roi);
 
 
-        //霍夫线段检测
-        /*
-           Hough tranform for line detection with feedback
-           Increase by 25 for the next frame if we found some lines.
-           This is so we don't miss other lines that may crop up in the next frame
-           but at the same time we don't want to start the feed back loop from scratch.
-
-
-       */
-
-
-
         //用canny算子对ROI进行特征提取
         Mat contours = cannyExtract(imgROI, true);
+        //用常规Hough变换进行直线检测
+        vector<Vec2f> lines = houghDected(200, contours);
 
 
-        cout << houghVote << "\n";
-        std::vector<Vec2f> lines;
-        if (houghVote < 1 or lines.size() > 2) { // we lost all lines. reset
-            houghVote = 300;
-        } else { houghVote += 25; }
-        while (lines.size() < 4 && houghVote > 0) {
-            HoughLines(contours, lines, 1, PI / 180, houghVote);
-            houghVote -= 5;
-        }
-        std::cout << houghVote << "\n";
         Mat result(imgROI.size(), CV_8U, Scalar(255));
-
         //将ROI深拷贝，得到一个全新的矩阵
         imgROI.copyTo(result);
-
         drawHoughDectedLines(lines, result, true);
 
-        // Create LineFinder instance
+//       //  Create LineFinder instance
 //        LineFinder ld;
 
         // Set probabilistic Hough parameters
@@ -258,7 +235,31 @@ void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough) {
     if (showHough) {
         imshow("Hough", result);
     }
+}
 
+vector<Vec2f> houghDected(int initialHoughVote, Mat &contours) {
+    //霍夫线段检测
+    /*
+       Hough tranform for line detection with feedback
+       Increase by 25 for the next frame if we found some lines.
+       This is so we don't miss other lines that may crop up in the next frame
+       but at the same time we don't want to start the feed back loop from scratch.
+   */
+
+    //将houghVote初始化
+    int houghVote = initialHoughVote;
+    cout << houghVote << "\n";
+    std::vector<Vec2f> lines;
+    if (houghVote < 1 or lines.size() > 2) { // we lost all lines. reset
+        houghVote = 300;
+    } else { houghVote += 25; }
+    while (lines.size() < 4 && houghVote > 0) {
+        HoughLines(contours, lines, 1, PI / 180, houghVote);
+        houghVote -= 5;
+    }
+    std::cout << houghVote << "\n";
+
+    return lines;
 
 }
 
