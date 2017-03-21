@@ -119,6 +119,9 @@ int main(int argc, char *argv[]) {
         Mat result(imgROI.size(), CV_8U, Scalar(255));
         //将ROI深拷贝，得到一个全新的矩阵
         imgROI.copyTo(result);
+
+        Mat Test(imgROI.size(), CV_8U, Scalar(0));
+
         drawHoughDectedLines(lines, result, true);
 
         //  Create LineFinder instance
@@ -133,46 +136,21 @@ int main(int argc, char *argv[]) {
         Mat houghP(imgROI.size(), CV_8U, Scalar(0));
         ld.setShift(0);
 
-        ld.drawDetectedLines(houghP);
+        ld.drawDetectedLines(imgROI);
 
-        imshow("houghP", houghP);
-
-
-        // bitwise AND of the two hough images
-//        bitwise_and(houghP, hough, houghP);
-//        Mat houghPinv(imgROI.size(), CV_8U, Scalar(0));
-//        Mat dst(imgROI.size(), CV_8U, Scalar(0));
-//        threshold(houghP, houghPinv, 150, 255, THRESH_BINARY_INV); // threshold and invert to black lines
+        imshow("houghP", imgROI);
 
 
 
-//        Canny(houghPinv, contours, 100, 350);
-//        li = ld.findLines(contours);
-        // Display Canny image
-//        if (showSteps) {
-//            namedWindow("Contours");
-//            imshow("Contours2", contours);
-//            imwrite("contours.bmp", contoursInv);
-//        }
 
-        // Set probabilistic Hough parameters
-        // more strict than above HoughP
 
-//        ld.setLineLengthAndGap(5, 2);
-//        ld.setMinVote(1);
-//        ld.setShift(image.cols / 3);
-//
-//
-//        ld.drawDetectedLines(image);
 
-        std::stringstream stream;
-//        stream << "Lines Segments: " << lines.size();
+        // bitwise ＯＲ of the two hough images
+//        bitwise_or(houghP, result, image);
 
-//        putText(image, stream.str(), Point(10, image.rows - 10), 2, 0.8, Scalar(0, 0, 255), 0);
+
         imshow(window_name, image);
-//        imwrite("processed.bmp", image);
 
-//        oVideoWriter.write(image); //writer the frame into the file
 
         char key = (char) waitKey(10);
         lines.clear();
