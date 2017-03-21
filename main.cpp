@@ -105,6 +105,8 @@ int main(int argc, char *argv[]) {
 
         Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
 
+
+        //这里没有用灰度图像
         Mat imgROI = image(roi);
 
 
@@ -119,19 +121,21 @@ int main(int argc, char *argv[]) {
         imgROI.copyTo(result);
         drawHoughDectedLines(lines, result, true);
 
-//       //  Create LineFinder instance
-//        LineFinder ld;
+        //  Create LineFinder instance
+        LineFinder ld;
 
-        // Set probabilistic Hough parameters
-//        ld.setLineLengthAndGap(10, 60);    //min accepted length and gap
-//        ld.setMinVote(15);    // sit > 3 to get rid of "spiderweb"
+        //  Set probabilistic Hough parameters
+        ld.setLineLengthAndGap(30, 40);    //min accepted length and gap
+        ld.setMinVote(100);    // sit > 3 to get rid of "spiderweb"
 
-        // Detect lines
-//        std::vector<Vec4i> li = ld.findLines(contours);
-//        Mat houghP(imgROI.size(), CV_8U, Scalar(0));
-//        ld.setShift(0);
-//        ld.drawDetectedLines(houghP);
-//        std::cout << "First Hough" << "\n";
+        //  Detect lines
+        std::vector<Vec4i> li = ld.findLines(contours);
+        Mat houghP(imgROI.size(), CV_8U, Scalar(0));
+        ld.setShift(0);
+
+        ld.drawDetectedLines(houghP);
+
+        imshow("houghP", houghP);
 
 
         // bitwise AND of the two hough images
@@ -207,6 +211,7 @@ Mat cannyExtract(Mat &imgROI, bool showCanny) {
 void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough) {
 
     std::vector<Vec2f>::const_iterator it = lines.begin();
+    cout << "常规Hough检测直线的个数为: " << lines.size() << endl;
 
     while (it != lines.end()) {
 

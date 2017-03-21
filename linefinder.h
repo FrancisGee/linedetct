@@ -25,6 +25,9 @@
 
 #define PI 3.1415926
 
+
+using namespace std;
+
 class LineFinder {
 
 private:
@@ -97,16 +100,31 @@ public:
     // Draw the detected lines on an image
     void drawDetectedLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255)) {
 
+
+        double k = std::numeric_limits<double>::infinity();
         // Draw the lines
         std::vector<cv::Vec4i>::const_iterator it2 = lines.begin();
+
+        cout << "概率Hough检测直线的个数为" << lines.size() << endl;
 
         while (it2 != lines.end()) {
 
             cv::Point pt1((*it2)[0], (*it2)[1] + shift);
             cv::Point pt2((*it2)[2], (*it2)[3] + shift);
 
-            cv::line(image, pt1, pt2, color, 6);
-            std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
+            if ((*it2)[0] - (*it2)[1] != 0) {
+                k = (double) ((*it2)[3] - (*it2)[1]) / (double) ((*it2)[2] - (*it2)[0]);
+            }
+
+            cout << "k = " << k << endl;
+            //根据斜率来筛选可能为直线的点，有点tricky
+            if (k > 0.4 || k < -0.15) {
+                cv::line(image, pt1, pt2, color, 6);
+                std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
+            }
+
+//            cv::line(image, pt1, pt2, color, 6);
+//            std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
             ++it2;
         }
     }
