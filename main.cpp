@@ -79,39 +79,54 @@ int main(int argc, char *argv[]) {
 
     //Process Frame
 
-    Mat image;
+    Mat input;
     double frameItr = 0; //?????
-    image = imread(argv[1]);
+    input = imread(argv[1]);
     int crestCount = 0, frameSkip = 0;    //???
 
 
     while (1) {
         // capture on intervals to make vid smoother
-        capture >> image;
+        capture >> input;
         frameItr += 100;
 
-        if (image.empty())
+        if (input.empty())
             break;
+
+        //固定视频帧的大小，便于检测
+        Mat image;
+        Size size(1280, 720);
+        resize(input, image, size);
+
+
+
 
         Mat gray;
 
 
         cvtColor(image, gray, CV_RGB2GRAY);
 
-        vector<string> codes; //???
-        Mat corners;
-        findDataMatrix(gray, codes, corners);
-        drawDataMatrixCodes(image, codes, corners);
+//        vector<string> codes; //???
+//        Mat corners;
+//        findDataMatrix(gray, codes, corners);
+//        drawDataMatrixCodes(image, codes, corners);
+
+        //可能与读取视频的速度有关
 
         Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
 
 
-        //这里没有用灰度图像
-        Mat imgROI = image(roi);
 
+
+        Mat imgROI = image(roi);
+        Mat grayROI = gray(roi);
+
+        imshow("original", grayROI);
 
         //用canny算子对ROI进行特征提取
-        Mat contours = cannyExtract(imgROI, true);
+        Mat contours = cannyExtract(grayROI, true);
+
+
         //用常规Hough变换进行直线检测
         vector<Vec2f> lines = houghDected(200, contours);
 
@@ -128,7 +143,7 @@ int main(int argc, char *argv[]) {
         LineFinder ld;
 
         //  Set probabilistic Hough parameters
-        ld.setLineLengthAndGap(30, 40);    //min accepted length and gap
+        ld.setLineLengthAndGap(90, 10);    //min accepted length and gap
         ld.setMinVote(100);    // sit > 3 to get rid of "spiderweb"
 
         //  Detect lines
@@ -152,8 +167,15 @@ int main(int argc, char *argv[]) {
         imshow(window_name, image);
 
 
-        char key = (char) waitKey(10);
+
         lines.clear();
+
+        int delay = 30;
+
+        if (delay >= 0 && waitKey(delay) >= 0)
+            waitKey(0);
+
+
     }
 }
 
@@ -171,7 +193,8 @@ Mat cannyExtract(Mat &imgROI, bool showCanny) {
 
     // Canny algorithm
     Mat contours;
-    Canny(imgROI, contours, 100, 200);
+    double thresh = 200;
+    Canny(imgROI, contours, 0.5 * thresh, thresh);
     Mat contoursInv;
     threshold(contours, contoursInv, 128, 255, THRESH_BINARY_INV);
 
@@ -191,6 +214,17 @@ void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough) {
     std::vector<Vec2f>::const_iterator it = lines.begin();
     cout << "常规Hough检测直线的个数为: " << lines.size() << endl;
 
+    int count = 0;
+//    while (it != lines.end()){
+//        float the = (*it)[1]; // second element is angle theta
+//        if (the > 0.09 && the < 1.48 ||
+//            the < 3.14 && the > 1.88){
+//            count++;
+//        }
+//    }
+//
+
+
     while (it != lines.end()) {
 
         float rho = (*it)[0];   // first element is distance rho
@@ -202,8 +236,19 @@ void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough) {
         if (theta > 0.09 && theta < 1.48 ||
             theta < 3.14 && theta > 1.88) { // filter to remove vertical and horizontal lines
 
+            count++;
+
+//            Point pt1, pt2;
+//            double a = cos(theta), b = sin(theta);
+//            double x0 = a * rho, y0 = b * rho;
+//            pt1.x = cvRound(x0 + 800 * (-b));
+//            pt1.y = cvRound(y0 + 800*(a));
+//            pt2.x = cvRound(x0 - 800*(-b));
+//            pt2.y = cvRound(y0 - 800*(a));
+
+
             // point of intersection of the line with first row
-            Point pt1(rho / cos(theta), 0);
+            Point pt1(rho / cos(theta), 10);
             // point of intersection of the line with last row
             Point pt2((rho - result.rows * sin(theta)) / cos(theta), result.rows);
             // draw a  line : Color = Scalar(R, G, B), thickness
@@ -213,6 +258,8 @@ void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough) {
         cout << "line: (" << rho << "," << theta << ")\n";
         ++it;
     }
+
+    cout << "count = " << count << endl;
 
     // Display the detected line image
     if (showHough) {
