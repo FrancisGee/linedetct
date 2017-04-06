@@ -22,6 +22,8 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <cv.h>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #define PI 3.1415926
 
@@ -99,6 +101,15 @@ public:
 
     // Draw the detected lines on an image
     void drawDetectedLines(cv::Mat &image, cv::Scalar color = cv::Scalar(255)) {
+        vector<cv::Point> leftEndPoint;
+        vector<cv::Point> leftStartPoint;
+
+
+        vector<cv::Point> rightStartPoint;
+        vector<cv::Point> rightEndPoint;
+
+
+        int houghPlinecount = 0;
 
 
         double k = std::numeric_limits<double>::infinity();
@@ -116,17 +127,53 @@ public:
                 k = (double) ((*it2)[3] - (*it2)[1]) / (double) ((*it2)[2] - (*it2)[0]);
             }
 
-            cout << "k = " << k << endl;
+//            cout << "k = " << k << endl;
             //根据斜率来筛选可能为直线的点，有点tricky
             if (k > 0.4 || k < -0.15) {
-                cv::line(image, pt1, pt2, color, 6);
+
+                //判断是否在图像的左边界还是右边界
+                if ((*it2)[0] < 0.5 * image.cols) {
+                    leftEndPoint.push_back(pt1);
+                    leftStartPoint.push_back(pt2);
+                } else {
+                    rightEndPoint.push_back(pt1);
+                    rightStartPoint.push_back(pt2);
+                }
+
+
+                cv::line(image, pt1, pt2, color, 3);
+
+//                  cv::line(image, leftEndPoint[0], leftStartPoint[0], color, 3);
+//                  cv::line(image, rightEndPoint[0], rightStartPoint[0], color, 3);
+
                 std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
+                houghPlinecount++;
             }
 
 //            cv::line(image, pt1, pt2, color, 6);
 //            std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
             ++it2;
         }
+
+
+//        float *fitline = new float[4];
+
+
+
+
+
+//        cvFitLine(leftline, CV_DIST_L2, 0, 0.01, 0.01,fitline);
+
+
+
+
+
+
+
+        cout << "概率Hough画出的直线数为" << houghPlinecount << endl;
+
+
+
     }
 
     // Eliminates lines that do not have an orientation equals to
