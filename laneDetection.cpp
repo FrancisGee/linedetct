@@ -18,7 +18,9 @@ laneDetection::laneDetection() {
 
     _width = 800;
     _height = 600;
-    _LMWidth = 10;
+
+//    _LMWidth = 10;
+    _LMWidth = 20;
     _thres = 40;
     _rho = 1;
     _theta = CV_PI / 180.0;
