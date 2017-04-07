@@ -44,6 +44,7 @@ Notes:
 #include <iostream>
 #include "linefinder.h"
 #include "laneDetection.h"
+#include "img_transform.h"
 
 
 #define PI 3.1415926
@@ -110,17 +111,27 @@ int main(int argc, char *argv[]) {
         Mat gray;
         cvtColor(image, gray, CV_RGB2GRAY);
 
+
+
+
+        /**
+         * 高斯平滑操作，消除图像噪点对边缘检检测器的影响(可选)
+         *
+         *
+         *
+         */
+        // object of GaussianFilter class
+        GaussianFilter _gaussianfilter;
+        _gaussianfilter.Init(4, 25);
+        Mat gauss_gray;
+        _gaussianfilter.Filter(gray, gauss_gray);
+
         //设置感兴趣区域大小，滤除天空等干扰
         Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
-        Mat grayROI = gray(roi);
+//        Mat grayROI = gray(roi);
 
+        Mat grayROI = gauss_gray(roi);
 
-        //得到垂直方向的边缘??
-//        Mat contours = detect.LMFiltering(grayROI); // Filtering to detect Lane Markings
-//        Mat contours = cannyExtract(grayROI,true);
-//        vector<Vec2f> lines = detect.houghTransform(contours); // Hough Transform
-//        Mat imgFinal = detect.drawLines(image, lines); // draw final Lane Markings on the original image
-//        drawHoughDectedLines(lines, input, true);
 
 
 
