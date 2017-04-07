@@ -24,6 +24,12 @@ using namespace cv;
 #define RADIAN_180              3.141592653589793
 #define ADIAN_NEGATIVE_90      -1.5707963267948966
 
+#include "equation.h"
+#include "img_transform.h"
+
+
+
+
 typedef struct LaneLineNode {
     LaneLineNode() {}
 
