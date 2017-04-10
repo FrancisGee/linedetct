@@ -45,6 +45,7 @@ Notes:
 #include "linefinder.h"
 #include "laneDetection.h"
 #include "img_transform.h"
+#include "utils.h"
 
 
 #define PI 3.1415926
@@ -52,7 +53,7 @@ Notes:
 using namespace cv;
 using namespace std;
 
-void showBasicInformation(VideoCapture &input);
+
 
 void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough);
 
@@ -60,22 +61,22 @@ vector<Vec2f> houghDected(int initialHoughVote, Mat &image);
 
 
 int main(int argc, char *argv[]) {
-//    int houghVote = 200;
 
 
 
+    //初始化Lanedetection实例
     laneDetection detect; // object of laneDetection class
 
 
-    //  Create LineFinder instance
+    //初始化LineFinder实例
     LineFinder ld;
 
     //初始化概率霍夫参数
-    //  Set probabilistic Hough parameters
     ld.setLineLengthAndGap(20, 10);    //min accepted length and gap
     ld.setMinVote(100);    // sit > 3 to get rid of "spiderweb"
     //根据驾驶员的角度设置偏移量
     ld.setShift(0);
+
 
     string arg = argv[1];
 
@@ -220,14 +221,7 @@ int main(int argc, char *argv[]) {
     }
 }
 
-void showBasicInformation(VideoCapture &capture) {
 
-    //显示视频尺寸信息
-    double dWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-    double dHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
-
-    std::cout << "Frame Size = " << dWidth << "x" << dHeight << std::endl;
-}
 
 void drawHoughDectedLines(vector<Vec2f> &lines, Mat &result, bool showHough) {
 
