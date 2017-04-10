@@ -26,3 +26,4 @@ void showBasicInformation(VideoCapture &capture) {
 
     cout << "视频的帧率为 " << rate << "fps" << endl;
 }
+
