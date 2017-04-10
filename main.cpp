@@ -66,6 +66,17 @@ int main(int argc, char *argv[]) {
 
     laneDetection detect; // object of laneDetection class
 
+
+    //  Create LineFinder instance
+    LineFinder ld;
+
+    //初始化概率霍夫参数
+    //  Set probabilistic Hough parameters
+    ld.setLineLengthAndGap(20, 10);    //min accepted length and gap
+    ld.setMinVote(100);    // sit > 3 to get rid of "spiderweb"
+    //根据驾驶员的角度设置偏移量
+    ld.setShift(0);
+
     string arg = argv[1];
 
 
@@ -77,26 +88,38 @@ int main(int argc, char *argv[]) {
 
     string window_name = "Processed Video";
     namedWindow(window_name, CV_WINDOW_KEEPRATIO); //resizable window;
+
     VideoCapture capture(arg);
 
-    if (!capture.isOpened()) //if this fails, try to open as a video camera, through the use of an integer param
-    { capture.open(atoi(arg.c_str())); }
+    // Check video is open
+    if (!capture.isOpened()) {
+        cout << "Could not read video file" << endl;
+        return -1;
+    }
+
 
     //显示视频尺寸，帧率等信息
     showBasicInformation(capture);
 
     //Process Frame
 
+
+
+    // Read first frame.
+    Mat frame1;
+    capture.read(frame1);
+
+
+
     Mat input;
-    double frameItr = 0; //?????
-    input = imread(argv[1]);
-    int crestCount = 0, frameSkip = 0;    //???
 
 
-    while (1) {
+
+    // Till we consider all the frame
+    while (capture.read(input)) {
         // capture on intervals to make vid smoother
-        capture >> input;
-        frameItr += 100;
+
+
 
         if (input.empty())
             break;
@@ -136,25 +159,9 @@ int main(int argc, char *argv[]) {
 
 
 
-//        Mat gray;
-//
-//
-//        cvtColor(image, gray, CV_RGB2GRAY);
-
-//        vector<string> codes; //???
-//        Mat corners;
-//        findDataMatrix(gray, codes, corners);
-//        drawDataMatrixCodes(image, codes, corners);
-
-        //可能与读取视频的速度有关
-
-//        Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
-
-
-
 
         Mat imgROI = image(roi);
-//        Mat grayROI = gray(roi);
+
 //
         imshow("original", grayROI);
 
@@ -170,24 +177,12 @@ int main(int argc, char *argv[]) {
         }
 
 
-        //用常规Hough变换进行直线检测
-//        vector<Vec2f> lines = houghDected(200, contours);
 
 
         Mat result(imgROI.size(), CV_8U, Scalar(255));
         //将ROI深拷贝，得到一个全新的矩阵
         imgROI.copyTo(result);
 
-//        Mat Test(imgROI.size(), CV_8U, Scalar(0));
-
-//        drawHoughDectedLines(lines, result, true);
-
-        //  Create LineFinder instance
-        LineFinder ld;
-
-        //  Set probabilistic Hough parameters
-        ld.setLineLengthAndGap(20, 10);    //min accepted length and gap
-        ld.setMinVote(100);    // sit > 3 to get rid of "spiderweb"
 
         //  Detect lines
         std::vector<Vec4i> li = ld.findLines(contours);
@@ -195,9 +190,7 @@ int main(int argc, char *argv[]) {
 
         Mat houghP(imgROI.size(), CV_8U, Scalar(0));
 
-        //根据驾驶员的角度设置偏移量
-        ld.setShift(0);
-//
+
         ld.drawDetectedLines(imgROI);
 //
         imshow("houghP", imgROI);
