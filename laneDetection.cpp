@@ -16,8 +16,7 @@ using namespace cv;
 
 laneDetection::laneDetection() {
 
-    _width = 800;
-    _height = 600;
+
 
 //    _LMWidth = 10;
     _LMWidth = 20;
@@ -62,6 +61,7 @@ Mat laneDetection::LMFiltering(Mat src) {
         // iterating through each column seeing the difference among columns which are "width" apart
         for (int i = _LMWidth; i < img.cols - _LMWidth; ++i) {
             if (imgptr[i] != 0) {
+                //二阶差分
                 val = 2 * imgptr[i];
                 val += -imgptr[i - _LMWidth];
                 val += -imgptr[i + _LMWidth];
@@ -76,7 +76,11 @@ Mat laneDetection::LMFiltering(Mat src) {
     }
 
     // Thresholding
+//    threshold(_detectedEdges, _detectedEdges, _thres, 255, THRESH_OTSU);
+//    threshold(_detectedEdges, _detectedEdges, _thres, 255, THRESH_BINARY);
     threshold(_detectedEdges, _detectedEdges, _thres, 255, 0);
+
+
     return _detectedEdges;
 
 }
