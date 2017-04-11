@@ -37,7 +37,6 @@ public:
     vector<Vec2f> houghTransform(Mat contours);                             //别人的常规霍夫检测
     Mat drawLines(Mat, vector<Vec2f>);
 
-    int _width, _height;
 
 protected:
     bool findIntersection(vector<Point>, Point &);
