@@ -13,17 +13,19 @@
 using namespace cv;
 using namespace std;
 
+void visulize(Mat &image, String name) {
+    imshow("name", image);
 
-void showBasicInformation(VideoCapture &capture) {
-
-    //显示视频尺寸信息
-    double dWidth = capture.get(CV_CAP_PROP_FRAME_WIDTH); //get the width of frames of the video
-    double dHeight = capture.get(CV_CAP_PROP_FRAME_HEIGHT); //get the height of frames of the video
-
-    cout << "Frame Size = " << dWidth << "x" << dHeight << endl;
-
-    double rate = capture.get(CV_CAP_PROP_FPS);
-
-    cout << "视频的帧率为 " << rate << "fps" << endl;
 }
 
+Mat converttoGray(Mat &image) {
+
+}
+
+Mat setROI(Mat &image, Mat &src) {
+
+    //设置感兴趣区域大小，滤除天空等干扰
+    Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
+    Mat grayROI = src(roi);
+    return grayROI;
+}
