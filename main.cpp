@@ -46,6 +46,7 @@ Notes:
 #include "laneDetection.h"
 #include "img_transform.h"
 #include "utils.h"
+#include "videoProcessor.h"
 
 #define PI 3.1415926
 
@@ -55,6 +56,10 @@ using namespace std;
 
 
 int main(int argc, char *argv[]) {
+
+
+    //初始化视频处理类
+    videoProcessor processor;
 
 
 
@@ -70,6 +75,14 @@ int main(int argc, char *argv[]) {
     ld.setMinVote(100);
     //根据驾驶员的角度设置偏移量
     ld.setShift(0);
+
+
+    // 初始化GaussianFilter class
+    GaussianFilter _gaussianfilter;
+    _gaussianfilter.Init(4, 25);
+
+
+
 
 
     string arg = argv[1];
@@ -94,7 +107,9 @@ int main(int argc, char *argv[]) {
 
 
     //显示视频尺寸，帧率等信息
-    showBasicInformation(capture);
+    int rate = processor.getFPS(capture);
+    processor.showBasicInformation(capture);
+
 
     //Process Frame
 
@@ -119,11 +134,10 @@ int main(int argc, char *argv[]) {
         if (input.empty())
             break;
 
-        //固定视频帧的大小，便于检测---width = 800 , height = 600
-        Mat image;
-        Size size(detect._width, detect._height);
-        resize(input, image, size);
-        cout << "width = " << image.cols << "  height = " << image.rows << endl;
+
+
+        //固定视频帧的大小，便于检测
+        Mat image = processor.setSize(input);
 
         //转换为灰度图处理
         Mat gray;
@@ -138,9 +152,7 @@ int main(int argc, char *argv[]) {
          *
          *
          */
-        // object of GaussianFilter class
-        GaussianFilter _gaussianfilter;
-        _gaussianfilter.Init(4, 25);
+
         Mat gauss_gray;
         _gaussianfilter.Filter(gray, gauss_gray);
 
@@ -148,7 +160,9 @@ int main(int argc, char *argv[]) {
         Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
 //        Mat grayROI = gray(roi);
 
-        Mat grayROI = gauss_gray(roi);
+//        Mat grayROI = gauss_gray(roi);
+
+        Mat grayROI = setROI(image, gauss_gray);
 
 
 
@@ -166,11 +180,12 @@ int main(int argc, char *argv[]) {
         //垂直边缘检测
         Mat contours = detect.LMFiltering(grayROI);
 
-        // Display Canny image
-        if (showCanny) {
-            imshow("Canny", contours);
-        }
+//        // Display Canny image
+//        if (showCanny) {
+//            imshow("Canny", contours);
+//        }
 
+        visulize(contours, "Canny");
 
 
 
@@ -189,12 +204,6 @@ int main(int argc, char *argv[]) {
         ld.drawDetectedLines(imgROI);
 //
         imshow("houghP", imgROI);
-
-
-
-
-
-
 
 
 
