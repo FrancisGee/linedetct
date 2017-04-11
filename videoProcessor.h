@@ -31,9 +31,15 @@ private:
 
 public:
 
+    int frame_width, frame_height;
+
     videoProcessor();
 
     double getFPS(VideoCapture &capture);
+
+    Mat setSize(Mat input);
+
+    void showBasicInformation(VideoCapture &input);
 
 
 };
