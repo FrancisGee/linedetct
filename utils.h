@@ -16,9 +16,11 @@ using namespace cv;
 #ifndef LINEDETECT_UTILS_H
 #define LINEDETECT_UTILS_H
 
-void showBasicInformation(VideoCapture &input);
+void visulize(Mat &image, String name);
 
+Mat converttoGray(Mat &image);
 
+Mat setROI(Mat &image, Mat &src);
 
 
 
