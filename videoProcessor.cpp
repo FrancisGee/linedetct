@@ -35,12 +35,11 @@ void videoProcessor::showBasicInformation(VideoCapture &capture) {
     cout << "视频的帧率为 " << rate << "fps" << endl;
 }
 
-Mat videoProcessor::setSize(Mat input) {
+void videoProcessor::setSize(Mat &input) {
 
     //固定视频帧的大小，便于检测---width = 800 , height = 600
-    Mat image;
     Size size(frame_width, frame_height);
-    resize(input, image, size);
-    cout << "width = " << image.cols << "  height = " << image.rows << endl;
-    return image;
+    resize(input, input, size);
+//    cout << "width = " << image.cols << "  height = " << image.rows << endl;
+
 }
