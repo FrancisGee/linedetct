@@ -36,12 +36,10 @@ Notes:
 	Added image ROI to reduce false lines from things like trees/powerlines
 \*------------------------------------------------------------------------------------------*/
 
-
+#include <iostream>
 #include <opencv2/core/core.hpp>
 #include "opencv2/highgui/highgui.hpp"
 #include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <iostream>
 #include "linefinder.h"
 #include "laneDetection.h"
 #include "img_transform.h"
@@ -137,11 +135,9 @@ int main(int argc, char *argv[]) {
 
 
         //固定视频帧的大小，便于检测
-        Mat image = processor.setSize(input);
+        processor.setSize(input);
 
-        //转换为灰度图处理
-        Mat gray;
-        cvtColor(image, gray, CV_RGB2GRAY);
+        Mat gray = converttoGray(input);
 
 
 
@@ -156,42 +152,27 @@ int main(int argc, char *argv[]) {
         Mat gauss_gray;
         _gaussianfilter.Filter(gray, gauss_gray);
 
-        //设置感兴趣区域大小，滤除天空等干扰
-        Rect roi(0, image.cols / 3, image.cols - 1, image.rows - image.cols / 3);// set the ROI for the image
-//        Mat grayROI = gray(roi);
 
-//        Mat grayROI = gauss_gray(roi);
-
-        Mat grayROI = setROI(image, gauss_gray);
+        Mat gray_gauss_ROI = setROI(input, gauss_gray);
 
 
 
+        //拿到输入固定大小帧的裁剪图像(未经过灰度变换，高斯模糊，边缘检测等操作)
+        Mat imgROI = setROI(input, input);
 
 
+        visulize(gray_gauss_ROI, "经过裁剪过的高斯模糊图像");
 
-        Mat imgROI = image(roi);
-
-//
-        imshow("original", grayROI);
 
         //用canny算子对ROI进行特征提取
 //        Mat contours = cannyExtract(grayROI, true);
 
         //垂直边缘检测
-        Mat contours = detect.LMFiltering(grayROI);
+        Mat contours = detect.LMFiltering(gray_gauss_ROI);
 
-//        // Display Canny image
-//        if (showCanny) {
-//            imshow("Canny", contours);
-//        }
-
-        visulize(contours, "Canny");
+        visulize(contours, "边缘检测后的图像");
 
 
-
-        Mat result(imgROI.size(), CV_8U, Scalar(255));
-        //将ROI深拷贝，得到一个全新的矩阵
-        imgROI.copyTo(result);
 
 
         //  Detect lines
@@ -201,13 +182,14 @@ int main(int argc, char *argv[]) {
         Mat houghP(imgROI.size(), CV_8U, Scalar(0));
 
 
-        ld.drawDetectedLines(imgROI);
+        ld.drawDetectedLines(imgROI, li);
 //
-        imshow("houghP", imgROI);
+//        imshow("houghP", imgROI);
+
+        visulize(imgROI, "概率霍夫检测车道线叠加到原图像");
 
 
-
-        imshow(window_name, image);
+        imshow(window_name, input);
 
 
 
