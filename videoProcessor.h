@@ -37,7 +37,7 @@ public:
 
     double getFPS(VideoCapture &capture);
 
-    Mat setSize(Mat input);
+    void setSize(Mat &input);
 
     void showBasicInformation(VideoCapture &input);
 
