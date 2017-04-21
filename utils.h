@@ -22,7 +22,9 @@ Mat converttoGray(Mat &image);
 
 Mat setROI(Mat &image, Mat &src);
 
-vector<Vec4i> leftLane(vector<Vec4i> lines);
+vector<Vec4i> findleftLane(vector<Vec4i> lines, Mat &image);
+
+vector<Vec4i> findrightLane(vector<Vec4i> lines, Mat &image);
 
 vector<Vec4i> validateLane(vector<Vec4i> lines);
 
