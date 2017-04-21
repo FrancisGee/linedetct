@@ -32,3 +32,42 @@ Mat setROI(Mat &metric, Mat &src) {
     Mat ROI = src(roi);
     return ROI;
 }
+
+
+vector<Vec4i> validateLane(vector<Vec4i> lines) {
+    std::vector<cv::Vec4i> lanes;
+    //用斜率來过滤不是车道线的直线
+    double k = std::numeric_limits<double>::infinity();
+
+    std::vector<cv::Vec4i>::const_iterator it = lines.begin();
+
+    while (it != lines.end()) {
+        cv::Point pt1((*it)[0], (*it)[1]);
+        cv::Point pt2((*it)[2], (*it)[3]);
+
+        if ((*it)[0] - (*it)[1] != 0) {
+            k = (double) ((*it)[3] - (*it)[1]) / (double) ((*it)[2] - (*it)[0]);
+        }
+
+        if (k > 0.4 || k < -0.15) {
+            lanes.push_back(*it);
+        }
+
+        ++it;
+    }
+    return lanes;
+
+}
+
+
+vector<Vec4i> leftLane(vector<Vec4i> lanes) {
+    std::vector<cv::Vec4i> leftLanes;
+
+
+    std::vector<cv::Vec4i>::const_iterator it = lanes.begin();
+
+
+}
+
+
+
