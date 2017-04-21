@@ -40,13 +40,14 @@ Mat laneDetection::LMFiltering(Mat src) {
     Mat img;
 
     ///// Generating the mask to mask the top half of the image
-    Mat mask = Mat(src.size(), CV_8UC1, Scalar(1));
-    for (int i = 0; i < mask.rows / 2; i++) {
-        for (int j = 0; j < mask.cols; j++) {
-            mask.at<uchar>(Point(j, i)) = 0;
-        }
-    }
-    src.copyTo(img, mask);
+//    Mat mask = Mat(src.size(), CV_8UC1, Scalar(1));
+//    for (int i = 0; i < mask.rows / 2; i++) {
+//        for (int j = 0; j < mask.cols; j++) {
+//            mask.at<uchar>(Point(j, i)) = 0;
+//        }
+//    }
+//    src.copyTo(img, mask);
+    src.copyTo(img);
     /////
 
     Mat _detectedEdges = Mat(img.size(), CV_8UC1); // detectedEdges
