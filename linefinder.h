@@ -24,6 +24,7 @@
 #include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "utils.h"
 
 
 #define PI 3.1415926
@@ -103,82 +104,101 @@ public:
     }
 
     // Draw the detected lines on an image
-    void drawDetectedLines(cv::Mat &image, vector<Vec4i> lines) {
-        vector<cv::Point> leftEndPoint;
-        vector<cv::Point> leftStartPoint;
+//    void drawDetectedLines(cv::Mat &image, vector<Vec4i> lines) {
+//
+//
+//        vector<cv::Point> leftEndPoint;
+//        vector<cv::Point> leftStartPoint;
+//
+//
+//        vector<cv::Point> rightStartPoint;
+//        vector<cv::Point> rightEndPoint;
+//
+//
+//        int houghPlinecount = 0;
+//
+//
+//        double k = std::numeric_limits<double>::infinity();
+//        // Draw the lines
+//        std::vector<cv::Vec4i>::const_iterator it2 = lines.begin();
+//
+//        cout << "概率Hough检测直线的个数为" << lines.size() << endl;
+//
+//        while (it2 != lines.end()) {
+//
+//            cv::Point pt1((*it2)[0] + shift, (*it2)[1] + shift);
+//            cv::Point pt2((*it2)[2]+ shift, (*it2)[3] + shift);
+//
+//            if ((*it2)[0] - (*it2)[1] != 0) {
+//                k = (double) ((*it2)[3] - (*it2)[1]) / (double) ((*it2)[2] - (*it2)[0]);
+//            }
+//
+////            cout << "k = " << k << endl;
+//            //根据斜率来筛选可能为直线的点，有点tricky
+//            if (k > 0.4 || k < -0.15) {
+//
+//                //判断是否在图像的左边界还是右边界
+//                if ((*it2)[0] < 0.5 * image.cols) {
+//                    leftEndPoint.push_back(pt1);
+//                    leftStartPoint.push_back(pt2);
+//                } else {
+//                    rightEndPoint.push_back(pt1);
+//                    rightStartPoint.push_back(pt2);
+//                }
+//
+//
+//                cv::line(image, pt1, pt2, Scalar(255), 3);
+//
+////                  cv::line(image, leftEndPoint[0], leftStartPoint[0], color, 3);
+////                  cv::line(image, rightEndPoint[0], rightStartPoint[0], color, 3);
+//
+//                std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
+//                houghPlinecount++;
+//            }
+//
+////            cv::line(image, pt1, pt2, color, 6);
+////            std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
+//            ++it2;
+//        }
+//
+//
+////        float *fitline = new float[4];
+//
+//
+//
+//
+//
+////        cvFitLine(leftline, CV_DIST_L2, 0, 0.01, 0.01,fitline);
+//
+//
+//
+//
+//
+//
+//
+//        cout << "概率Hough画出的直线数为" << houghPlinecount << endl;
+//
+//
+//
+//    }
 
 
-        vector<cv::Point> rightStartPoint;
-        vector<cv::Point> rightEndPoint;
+    void drawDetectedLanes(cv::Mat &image, vector<Vec4i> lane) {
+        std::vector<cv::Vec4i>::const_iterator it = lane.begin();
 
+        while (it != lane.end()) {
 
-        int houghPlinecount = 0;
+            cv::Point pt1((*it)[0] + shift, (*it)[1] + shift);
+            cv::Point pt2((*it)[2] + shift, (*it)[3] + shift);
 
+            cv::line(image, pt1, pt2, Scalar(255), 3);
 
-        double k = std::numeric_limits<double>::infinity();
-        // Draw the lines
-        std::vector<cv::Vec4i>::const_iterator it2 = lines.begin();
+            ++it;
 
-        cout << "概率Hough检测直线的个数为" << lines.size() << endl;
-
-        while (it2 != lines.end()) {
-
-            cv::Point pt1((*it2)[0], (*it2)[1] + shift);
-            cv::Point pt2((*it2)[2], (*it2)[3] + shift);
-
-            if ((*it2)[0] - (*it2)[1] != 0) {
-                k = (double) ((*it2)[3] - (*it2)[1]) / (double) ((*it2)[2] - (*it2)[0]);
-            }
-
-//            cout << "k = " << k << endl;
-            //根据斜率来筛选可能为直线的点，有点tricky
-            if (k > 0.4 || k < -0.15) {
-
-                //判断是否在图像的左边界还是右边界
-                if ((*it2)[0] < 0.5 * image.cols) {
-                    leftEndPoint.push_back(pt1);
-                    leftStartPoint.push_back(pt2);
-                } else {
-                    rightEndPoint.push_back(pt1);
-                    rightStartPoint.push_back(pt2);
-                }
-
-
-                cv::line(image, pt1, pt2, Scalar(255), 3);
-
-//                  cv::line(image, leftEndPoint[0], leftStartPoint[0], color, 3);
-//                  cv::line(image, rightEndPoint[0], rightStartPoint[0], color, 3);
-
-                std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
-                houghPlinecount++;
-            }
-
-//            cv::line(image, pt1, pt2, color, 6);
-//            std::cout << " HoughP line: (" << pt1 << "," << pt2 << ")\n";
-            ++it2;
         }
 
 
-//        float *fitline = new float[4];
-
-
-
-
-
-//        cvFitLine(leftline, CV_DIST_L2, 0, 0.01, 0.01,fitline);
-
-
-
-
-
-
-
-        cout << "概率Hough画出的直线数为" << houghPlinecount << endl;
-
-
-
     }
-
     // Eliminates lines that do not have an orientation equals to
     // the ones specified in the input matrix of orientations
     // At least the given percentage of pixels on the line must
