@@ -60,14 +60,38 @@ vector<Vec4i> validateLane(vector<Vec4i> lines) {
 }
 
 
-vector<Vec4i> leftLane(vector<Vec4i> lanes) {
+vector<Vec4i> findleftLane(vector<Vec4i> lanes, Mat &image) {
     std::vector<cv::Vec4i> leftLanes;
 
 
     std::vector<cv::Vec4i>::const_iterator it = lanes.begin();
 
+    while (it != lanes.end()) {
+        if ((*it)[0] < 0.5 * image.cols) {
+            leftLanes.push_back(*it);
+        }
+        it++;
+    }
+    return leftLanes;
+
 
 }
+
+vector<Vec4i> findrightLane(vector<Vec4i> lanes, Mat &image) {
+    std::vector<cv::Vec4i> rightLanes;
+
+    std::vector<cv::Vec4i>::const_iterator it = lanes.begin();
+
+    while (it != lanes.end()) {
+        if ((*it)[0] >= 0.5 * image.cols) {
+            rightLanes.push_back(*it);
+        }
+        it++;
+    }
+    return rightLanes;
+}
+
+
 
 
 
