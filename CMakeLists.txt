@@ -3,6 +3,13 @@ project(linedetect)
 find_package(OpenCV REQUIRED)
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES main.cpp linefinder.h equation.h utils.h basic.h img_transform.h laneDetection.h laneDetection.cpp img_transform.cpp)
+set(SOURCE_FILES main.cpp linefinder.h equation.h utils.h basic.h img_transform.h laneDetection.h laneDetection.cpp img_transform.cpp utils.cpp regular_hough.cpp videoProcessor.h videoProcessor.cpp catch.h test.cpp car_detection.h car_detection.cpp)
 add_executable(linedetect ${SOURCE_FILES} linefinder.h img_transform.h)
+
+#set(SOURCE_FILES non_linear_svms.cpp)
+#add_executable(linedetect ${SOURCE_FILES})
+
+
 target_link_libraries(linedetect ${OpenCV_LIBS})
+
+
