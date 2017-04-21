@@ -43,8 +43,8 @@ Notes:
 #include "linefinder.h"
 #include "laneDetection.h"
 #include "img_transform.h"
-#include "utils.h"
 #include "videoProcessor.h"
+#include "car_detection.h"
 
 #define PI 3.1415926
 
@@ -58,6 +58,9 @@ int main(int argc, char *argv[]) {
 
     //初始化视频处理类
     videoProcessor processor;
+
+    //初始化车辆检测类
+    CarDetection car_detect;
 
 
 
@@ -79,23 +82,23 @@ int main(int argc, char *argv[]) {
     GaussianFilter _gaussianfilter;
     _gaussianfilter.Init(4, 25);
 
+    if (argc < 3) {
+        cout << "Usage " << argv[0] << "  video.avi  cascade.xml" << endl;
+        return -1;
+    }
 
 
+    string video_file_name = argv[1];
+    String vehicles_cascade_name = argv[2];
 
 
-    string arg = argv[1];
+    car_detect.init(vehicles_cascade_name);
 
-
-    //Set up windows
-    //for Debug
-    bool showOriginal = false;
-    bool showCanny = true;
-    bool showHoughP = false;
 
     string window_name = "Processed Video";
     namedWindow(window_name, CV_WINDOW_KEEPRATIO); //resizable window;
 
-    VideoCapture capture(arg);
+    VideoCapture capture(video_file_name);
 
     // Check video is open
     if (!capture.isOpened()) {
@@ -110,12 +113,6 @@ int main(int argc, char *argv[]) {
 
 
     //Process Frame
-
-
-
-    // Read first frame.
-    Mat frame1;
-    capture.read(frame1);
 
 
 
@@ -136,6 +133,9 @@ int main(int argc, char *argv[]) {
 
         //固定视频帧的大小，便于检测
         processor.setSize(input);
+
+
+//        car_detect.detectAndDisplay(input);
 
         Mat gray = converttoGray(input);
 
@@ -160,40 +160,38 @@ int main(int argc, char *argv[]) {
         //拿到输入固定大小帧的裁剪图像(未经过灰度变换，高斯模糊，边缘检测等操作)
         Mat imgROI = setROI(input, input);
 
+//        car_detect.detectAndDisplay(imgROI);
+
 
         visulize(gray_gauss_ROI, "经过裁剪过的高斯模糊图像");
 
 
         //用canny算子对ROI进行特征提取
-//        Mat contours = cannyExtract(grayROI, true);
+
 
         //垂直边缘检测
         Mat contours = detect.LMFiltering(gray_gauss_ROI);
 
         visulize(contours, "边缘检测后的图像");
-
-
-
-
-        //  Detect lines
-        std::vector<Vec4i> li = ld.findLines(contours);
-
-
-        Mat houghP(imgROI.size(), CV_8U, Scalar(0));
-
-
-        ld.drawDetectedLines(imgROI, li);
 //
-//        imshow("houghP", imgROI);
+//
+//
+        std::vector<Vec4i> line = ld.findLines(contours);
+//
+        std::vector<Vec4i> lanes = validateLane(line);
 
+        ld.drawDetectedLanes(imgROI, lanes);
+//
+        imshow("houghP", imgROI);
+//
         visulize(imgROI, "概率霍夫检测车道线叠加到原图像");
-
-
+//
+//
         imshow(window_name, input);
-
-
-
-
+//
+//
+//
+//
 
 
         //交互式操作，按任意键就可以暂停，再按任意键就恢复播放
