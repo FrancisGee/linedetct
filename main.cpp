@@ -180,7 +180,11 @@ int main(int argc, char *argv[]) {
 //
         std::vector<Vec4i> lanes = validateLane(line);
 
-        ld.drawDetectedLanes(imgROI, lanes);
+        vector<Vec4i> leftLanes = findleftLane(lanes, input);
+        vector<Vec4i> rightLanes = findrightLane(lanes, input);
+
+        ld.drawDetectedLanes(imgROI, leftLanes);
+        ld.drawDetectedLanes(imgROI, rightLanes);
 //
         imshow("houghP", imgROI);
 //
