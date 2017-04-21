@@ -22,6 +22,9 @@ Mat converttoGray(Mat &image);
 
 Mat setROI(Mat &image, Mat &src);
 
+vector<Vec4i> leftLane(vector<Vec4i> lines);
+
+vector<Vec4i> validateLane(vector<Vec4i> lines);
 
 
 #endif //LINEDETECT_UTILS_H
